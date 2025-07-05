@@ -164,7 +164,7 @@ A callback that will run any time a angle is changed betwen "Global" or "Local"
 ---
 ### `Client.OnPlace`
 ```
-MUST ASSING A FUNCTION TO THIS
+MUST ADD A FUNCTION TO THIS
 
 Runs on prop placed.
 ```
@@ -172,7 +172,7 @@ Runs on prop placed.
 ---
 ### `Client.OnDelete`
 ```
-MUST ASSING A FUNCTION TO THIS
+MUST ADD A FUNCTION TO THIS
 
 Runs on prop deleted
 ```
@@ -180,7 +180,7 @@ Runs on prop deleted
 ---
 ### `Client.OnInteract`
 ```
-MUST ASSING A FUNCTION TO THIS
+MUST ADD A FUNCTION TO THIS
 
 Runs on prop interacted with. This only means local edits not interaction part.
 ```
@@ -188,7 +188,7 @@ Runs on prop interacted with. This only means local edits not interaction part.
 ---
 ### `Client.OnSelect`
 ```
-MUST ASSING A FUNCTION TO THIS
+MUST ADD A FUNCTION TO THIS
 
 Runs when the props selection box is clicked.
 ```
