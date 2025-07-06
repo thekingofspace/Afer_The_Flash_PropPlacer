@@ -141,7 +141,7 @@ Enters edit mode for the prop placer.
 ---
 ### `Client:LoadSave(Save:number, Near:boolean)`
 ```
-Load a save using the save number, if near is true then it will replicate near the player.
+Load a save using the save number, if near is true then it will make a prop container that will be used to edit the load.
 ```
 
 ---

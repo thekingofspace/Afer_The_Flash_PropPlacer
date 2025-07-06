@@ -163,6 +163,10 @@ function module:EasyInit()
 	EventBuilder:GetEvent("GetProps").OnServerInvoke = function(PL)
 		return PropList
 	end
+	
+	EventBuilder:GetEvent("GetSave").OnServerInvoke = function(PL, ID:number)
+		return PlayerController:GetSave(PL, ID)
+	end
 
 	
 	EventBuilder:GetEvent("EditProps").OnServerInvoke = function(PL:Player, Props:{[string]:CFrame})
@@ -256,7 +260,7 @@ function module:EasyInit()
 		end
 	end
 	
-	EventBuilder:GetEvent("LoadProps").OnServerInvoke = function(PL:Player, Save:number, Near:boolean)
+	EventBuilder:GetEvent("LoadProps").OnServerInvoke = function(PL:Player, SaveData:Types.PropSave)
 		if PlayerDebounce[PL] == true then
 			return "Failed"
 		end
@@ -266,7 +270,7 @@ function module:EasyInit()
 			PlayerDebounce[PL] = false
 		end)
 
-		local Save:Types.PropSave = PlayerController:GetSave(PL, Save)
+		local Save:Types.PropSave = SaveData
 
 		local SendBack = {}
 
@@ -345,25 +349,6 @@ function module:EasyInit()
 
 		while #SendBack ~= ActualCount do
 			task.wait()
-		end
-
-		if Near == true and #SendBack ~= 0 then
-			local Model = Instance.new("Model")
-			for _, item in ipairs(SendBack) do
-				item.Parent = Model
-			end
-			Model:PivotTo(CFrame.new(PL.Character:GetPivot().Position))
-
-			local Data = {}
-
-			for _, item in ipairs(Model:GetChildren()) do
-				item.Parent = PropFolder
-				table.insert(Data, item.Name)
-			end
-
-			Model:Destroy()
-
-			LoadNear:InvokeClient(PL, Data)
 		end
 	end
 

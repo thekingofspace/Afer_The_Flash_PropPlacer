@@ -28,6 +28,22 @@ function module:StreamModel(StreamID:string, ID:number)
 	return NewModel
 end
 
+function module:StreamModel_Multiple(StreamID:string, ID:{number}):{[number]:Model}
+	local ReturnTable = {}
+	for I, item in ipairs(ID) do
+		if ReturnTable[item] == nil then
+			GetEvent("StreamIn"):InvokeServer(item, StreamID .. I)
+
+			ReturnTable[item] = GetStreamFolder():WaitForChild(StreamID .. I):Clone()
+			
+			GetEvent("StreamOut"):InvokeServer(StreamID .. I)
+		end
+	end
+
+	return ReturnTable
+end
+
+
 function module:GetPlayerPropFolder()
 	CachedFolderProp = CachedFolderProp or game.Workspace:WaitForChild(game.Players.LocalPlayer.Name .. "_Props")
 

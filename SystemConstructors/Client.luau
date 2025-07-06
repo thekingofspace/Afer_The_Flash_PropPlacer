@@ -67,8 +67,18 @@ local BlockMouse = false
 local PropID = nil
 
 local ClicksToReturn = {}
+local Types = require(script.Parent.Parent:WaitForChild("Type_Definitions"))
+
 
 local CurrentDrag:DragHandler.EditorController = nil
+
+local SaveData = {
+	SaveData = {}::Types.PropSave;
+	
+	PropData = {}::{{Prop:Model, Spot:number}};
+	
+	EditingSave = false
+}
 
 local function ReturnClick()
 	for I:Model, item:ClickDetector in pairs(ClicksToReturn) do
@@ -274,48 +284,34 @@ function module:BindStandardControls()
 	end)
 	
 	ControlHandler:AssignAction("INPUT", "ClearPlace", function()
-		if EditingLoad == true then
-			if #Selected > 0 then
+		if SaveData.EditingSave == true then
+			if CurrentDrag then
+				CurrentDrag:Destroy()
+				
+				CurrentDrag = nil
+				
+				ReferenceModel:Destroy()
+				
 				if module.OnDelete then
 					module.OnDelete()
 				end
-
-				CurrentDrag:Destroy()
-
-				ReturnClick()
-
-				local ModelsToBreak = {}
-
-				for I, item in ipairs(ReferenceModel:GetChildren()) do
-					if item:IsA("Model") then
-						table.insert(ModelsToBreak, item.Name)
-					end
+				
+				for I, item in ipairs(CS:GetTagged("Soft_Copies")) do
+					item:Destroy()
 				end
+				
+				SaveData.EditingSave = false
+				
+				SaveData.SaveData = {}
+				
+				SaveData.PropData = {}
+				
+				EditingContainer = false
 
-				module:UnMakeContainer(ReferenceModel)
+				BlockInteract = false
 
-				for I, item in ipairs(ModelsToBreak) do
-					task.spawn(function()
-						EventInteract:GetEvent("DestroyProp"):InvokeServer(item)
-					end)
-				end
+				RemovedSelected = false
 			end
-			
-			EditingContainer = false
-			
-			CurrentDrag = nil
-			
-			ReferenceModel = nil
-			
-			EditingLoad = false
-			
-			BlockInteract = false
-
-			RemovedSelected = false
-			
-			Selected = {}
-			
-			RanSelect = false
 		else
 			if BlockInteract == true then
 				if module.OnDelete then
@@ -379,33 +375,64 @@ function module:BindStandardControls()
 			if module.OnPlace then
 				module.OnPlace()
 			end
-			if EditingContainer == true then
+			if SaveData.EditingSave == true then
+				SaveData.EditingSave = false
 				CurrentDrag:Destroy()
-				
-				local ContainerContents = module:GetContainerContents(ReferenceModel)
-				
-				module:UnMakeContainer(ReferenceModel)
-				
-				ReferenceModel = nil
-				
-				EventInteract:GetEvent("EditProps"):InvokeServer(ContainerContents)
-				
-				EditingContainer = false
-				
 				CurrentDrag = nil
 				
-				ReturnClick()
+				for	I, item in ipairs(SaveData.PropData) do
+					local Pivot = item.Prop:GetPivot()
+
+					local x, y, z = Pivot:ToEulerAnglesXYZ()
+					SaveData.SaveData.PropData[item.Spot].Position = {
+						X = Pivot.Position.X,
+						Y = Pivot.Position.Y,
+						Z = Pivot.Position.Z,
+						RX = x,
+						RY = y,
+						RZ = z,
+					}
+				end
+				for I, item in ipairs(CS:GetTagged("Soft_Copies")) do
+					item:Destroy()
+				end
 				
-			else
-				CurrentDrag:Destroy()
+				EventInteract:GetEvent("LoadProps"):InvokeServer(SaveData.SaveData)
 				
-				EventInteract:GetEvent("PlaceProp"):InvokeServer(PropID, ReferenceModel:GetPivot())
+				SaveData.SaveData = {}
+				
+				SaveData.PropData = {}
 				
 				ReferenceModel:Destroy()
-				
-				ReferenceModel = nil
-				
-				CurrentDrag = nil
+			else
+				if EditingContainer == true then
+					CurrentDrag:Destroy()
+
+					local ContainerContents = module:GetContainerContents(ReferenceModel)
+
+					module:UnMakeContainer(ReferenceModel)
+
+					ReferenceModel = nil
+
+					EventInteract:GetEvent("EditProps"):InvokeServer(ContainerContents)
+
+					EditingContainer = false
+
+					CurrentDrag = nil
+
+					ReturnClick()
+
+				else
+					CurrentDrag:Destroy()
+
+					EventInteract:GetEvent("PlaceProp"):InvokeServer(PropID, ReferenceModel:GetPivot())
+
+					ReferenceModel:Destroy()
+
+					ReferenceModel = nil
+
+					CurrentDrag = nil
+				end
 			end
 		end
 	end)
@@ -697,7 +724,43 @@ end
 
 function module:LoadSave(Save:number, Near:boolean)
 	if CurrentDrag == nil then
-		return EventInteract:GetEvent("LoadProps"):InvokeServer(Save, Near)
+		local Save:Types.PropSave = EventInteract:GetEvent("GetSave"):InvokeServer(Save)
+		if Near == false then
+			EventInteract:GetEvent("LoadProps"):InvokeServer(Save)
+			
+		else
+			SaveData.EditingSave = true
+			SaveData.SaveData = Save
+			local ModelsToGet = {}
+			
+			for I, item in ipairs(Save.PropData) do
+				if not table.find(ModelsToGet,  item.ID) then
+					table.insert(ModelsToGet, item.ID)
+				end
+			end
+			
+			local Models:{Model} = EventInteract:StreamModel_Multiple("Load_Props", ModelsToGet)
+			
+			local EditGroup = {}
+			
+			for E, prop in ipairs(Save.PropData) do
+				local NewModel = Models[prop.ID]:Clone()
+				
+				local Position = CFrame.new(prop.Position.X, prop.Position.Y, prop.Position.Z) * CFrame.Angles(prop.Position.RX, prop.Position.RY, prop.Position.RZ)
+				
+				NewModel:PivotTo(Position)
+				
+				table.insert(SaveData.PropData, {Prop = NewModel, Spot = E})
+				
+				table.insert(EditGroup, NewModel)
+			end
+			
+			module:EditContainer(module:MakePropContainer(EditGroup))
+			
+			if ReferenceModel then
+				ReferenceModel:PivotTo(game.Players.LocalPlayer.Character:GetPivot())
+			end
+		end
 	end
 end
 
