@@ -206,6 +206,7 @@ function module:MakePropContainer(Props:{Model})
 	Highlight.FillColor = Color3.new(0.196078, 0.196078, 0.196078)
 
 	Highlight.OutlineColor = Color3.new(0.101961, 0.101961, 0.101961)
+	Highlight.DepthMode = Enum.HighlightDepthMode.Occluded
 	task.delay(0.1, function()
 		Highlight.Adornee = Container
 
@@ -314,6 +315,10 @@ function module:BindStandardControls()
 			end
 		else
 			if BlockInteract == true then
+				if #Selected == 0 then
+					return
+				end
+				
 				if module.OnDelete then
 					module.OnDelete()
 				end
