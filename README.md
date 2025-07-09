@@ -371,6 +371,7 @@ end)
 ### `Client:Calc_Time_Value(minValue, maxValue, hour, specialValues)`
 ### Code Example:
 ```lua
+-- Min value is for 0/24 max is for 12, special values use key index pairs to define values for that time.
 Client.OnTick:Connect(function(Time: number)
 	game.Lighting.ClockTime = Time
 
