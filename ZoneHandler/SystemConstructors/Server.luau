@@ -12,11 +12,14 @@ local WeatherUpdate = Events:GetGlobal("WeatherUpdate")
 
 local GetTime = Events:GetEvent("GetTime")
 
+local GetWeather = Events:GetEvent("GetWeather")
+
 local Signal = require(Shared:WaitForChild("Signal"))
 
 local OnWeather = Signal:CreateSignal()
 
 local Weather_Task = nil
+local CurrentWeather = "None"
 
 module.ShouldBlock = false
 
@@ -95,6 +98,7 @@ TimeObject.OnHour:Connect(function(Hour)
 			WeatherUpdate:FireAllClients(Weather)
 			
 			OnWeather:Fire(Weather)
+			CurrentWeather = Weather
 
 			Weather_Task = task.delay(module.WeatherCooldown, function()
 				WeatherUpdate:FireAllClients("None")
@@ -104,6 +108,8 @@ TimeObject.OnHour:Connect(function(Hour)
 				WeatherDebounce = false
 				
 				Weather_Task = nil
+				
+				CurrentWeather = "None"
 			end)
 		end
 	end
@@ -116,6 +122,7 @@ end
 function module:SetWeather(Weather:string)
 	WeatherUpdate:FireAllClients(Weather)
 	OnWeather:Fire(Weather)
+	CurrentWeather = Weather
 end
 
 function module:BlockWeather(Boolean:boolean)
@@ -134,6 +141,7 @@ function module:BreakCooldown(CancelWeather:boolean)
 	if CancelWeather == true then
 		WeatherUpdate:FireAllClients("None")
 		OnWeather:Fire("None")
+		CurrentWeather = "None"
 	end
 end
 
@@ -147,6 +155,10 @@ end
 
 function MinutesToSeconds(minutes)
 	return minutes * 60
+end
+
+GetWeather.OnServerInvoke = function()
+	return CurrentWeather
 end
 
 function module:CreateWeather(Weather_Rarity:Enumerator.Custom_Enum, WeatherID:string)

@@ -16,6 +16,8 @@ local WeatherUpdate = Events:GetGlobal("WeatherUpdate")
 
 module.CurrentWeather = "None"
 
+local GetWeather = Events:GetEvent("GetWeather")
+
 function module:Calc_Time_Value(minValue, maxValue, hour, specialValues)
 	hour = hour % 24
 
@@ -81,8 +83,6 @@ function module:Calc_Time_Value(minValue, maxValue, hour, specialValues)
 	end
 end
 
-
-
 module.OnHour = TimeObject.OnHour
 
 module.OnTick = TimeObject.OnTick
@@ -132,9 +132,17 @@ function module:GetTime()
 	return Events:GetEvent("GetTime"):InvokeServer()
 end
 
+function module:GetWeather()
+	module.CurrentWeather = GetWeather:InvokeServer()
+	
+	return module.CurrentWeather
+end
+
+
 WeatherUpdate.OnClientEvent:Connect(function(Weather)
 	module.CurrentWeather = Weather
 end)
+
 
 
 return module

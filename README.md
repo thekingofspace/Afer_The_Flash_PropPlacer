@@ -317,6 +317,11 @@ The first enum makes it easier to set your timerate. Time is the number being us
 ---
 ### `Client:GetTime()`
 ```
+Returns the global synced weather.
+```
+---
+### `Client:GetWeather()`
+```
 Returns the global synced time from server so when you resume time it will match the server!
 ```
 
