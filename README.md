@@ -317,7 +317,7 @@ The first enum makes it easier to set your timerate. Time is the number being us
 ---
 ### `Client:GetTime()`
 ```
-Do I need to explain this one?
+Returns the global synced time from server so when you resume time it will match the server!
 ```
 
 ---
@@ -429,11 +429,6 @@ Force changes the global time, this will desync from server. until next server u
 ### `Server:SetTimeRate(Calc_Type:Enumerator.Custom_Enum, Time:number)`
 ```
 The first enum makes it easier to set your timerate. Time is the number being used
-```
----
-### `Server:GetTime()`
-```
-Do I need to explain this one?
 ```
 ---
 ### `Server:SetWeather(Weather:string)`
