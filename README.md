@@ -272,3 +272,178 @@ Returns a boolean of if the player owns the pack or not.
 ```
 Returns all packs the player owns.
 ```
+---
+# RAIKINS WEATHER AND ZONE SYSTEM
+Down here will go into detail on how zones work!
+
+## CLIENT
+
+Gotten via `SubZone.GetClient()`
+
+### `Client:ResumeTime()`
+```
+Resumes the time reviving the OnTick and OnHour events. Note when paused client still recieves on weather calls.
+```
+---
+### `Client:PauseTime()`
+```
+Pauses the time killing the OnTick and OnHour events. Note when paused client still recieves on weather calls.
+```
+---
+### `Client:SetTime(Time:number)`
+```
+Force changes the global time, this will desync from server. until next server update.
+```
+---
+### `Client:CreateZone(ZoneID:string, Parts:{BasePart})`
+### Creation
+```
+So on creating a subzone you input your ZoneID and the parts that make up the zone.
+
+This will then make those parts Anchored, NonCollide but with Query.
+```
+
+### ZoneUpdates
+```
+On a player entering/exiting a zone it will add the OnZoneEnter and OnZoneExit to a que, each renderstep
+
+it will check the next item in que then triggering the correct event.
+```
+---
+### `Client:SetTimeRate(Calc_Type:Enumerator.Custom_Enum, Time:number)`
+```
+The first enum makes it easier to set your timerate. Time is the number being used
+```
+---
+### `Client:GetTime()`
+```
+Do I need to explain this one?
+```
+
+---
+### `Client.OnHour`
+### Code Example:
+```lua
+Client.OnHour:Connect(function(Time: number)
+    -- Code goes here
+end)
+```
+---
+### `Client.OnTick`
+### Code Example:
+```lua
+Client.OnTick:Connect(function(Time: number)
+    -- Code goes here
+end)
+```
+---
+### `Client.OnZoneExit`
+### Code Example:
+```lua
+Client.OnZoneExit:Connect(function(Action:Enumerator.Custom_Enum, SubID:string)
+
+end)
+
+```
+---
+### `Client.OnZoneEnter`
+### Code Example:
+```lua
+Client.OnZoneEnter:Connect(function(Action:Enumerator.Custom_Enum, SubID:string)
+
+end)
+
+```
+---
+### `Client.OnWeather`
+### Code Example:
+```lua
+Client.OnWeather:Connect(function(WeatherID:string)
+	
+end)
+```
+---
+### `Client:Calc_Time_Value(minValue, maxValue, hour, specialValues)`
+### Code Example:
+```lua
+Client.OnTick:Connect(function(Time: number)
+	game.Lighting.ClockTime = Time
+
+	game.Lighting.Brightness = Client:Calc_Time_Value(0.4, 3, Time)
+
+	game.Lighting.Atmosphere.Density = Client:Calc_Time_Value(1.2, 0.3, Time, {
+		[0] = 1,
+		[6] = 0.4,
+		[7] = 0.2,
+		[8] = 0.2,
+		[12] = 0.2,
+		[19] = 0.5,
+		[21] = 1,
+		[24] = 1,
+	})
+
+	game.Lighting.Atmosphere.Color = Client:Calc_Time_Value(Color3.new(0.0666667, 0.0666667, 0.0666667), Color3.new(1, 1, 1), Time, {
+		[0] = Color3.fromRGB(0,0,0),
+		[6] = Color3.fromRGB(255,200,150),
+		[12] = Color3.fromRGB(255,255,255),
+		[13.8] = Color3.fromRGB(255,255,255),
+		[15] = Color3.fromRGB(175,71,104),
+		[16] = Color3.fromRGB(172,86,43),
+		[18] = Color3.fromRGB(89,45,22),
+		[20] = Color3.fromRGB(0,0,0),
+		[24] = Color3.fromRGB(0,0,0)
+	})
+	
+	Clouds.Color = Client:Calc_Time_Value(Color3.new(0.0666667, 0.0666667, 0.0666667), Color3.new(1, 1, 1), Time, {
+		[0] = Color3.fromRGB(0,0,0),
+		[6] = Color3.fromRGB(255,200,150),
+		[12] = Color3.fromRGB(255,255,255),
+		[13.8] = Color3.fromRGB(255,255,255),
+		[15] = Color3.fromRGB(175,71,104),
+		[16] = Color3.fromRGB(172,86,43),
+		[18] = Color3.fromRGB(89,45,22),
+		[20] = Color3.fromRGB(0,0,0),
+		[24] = Color3.fromRGB(0,0,0)
+	})
+end)
+```
+## Server
+
+Gotten via `SubZone.GetServer()`
+
+### `Server:ResumeTime()`
+```
+Resumes the time reviving the OnTick and OnHour events. Note when paused client still recieves on weather calls.
+```
+---
+### `Server:PauseTime()`
+```
+Pauses the time killing the OnTick and OnHour events. Note when paused client still recieves on weather calls.
+```
+---
+### `Server:SetTime(Time:number)`
+```
+Force changes the global time, this will desync from server. until next server update.
+```
+---
+### `Server:SetTimeRate(Calc_Type:Enumerator.Custom_Enum, Time:number)`
+```
+The first enum makes it easier to set your timerate. Time is the number being used
+```
+---
+### `Server:GetTime()`
+```
+Do I need to explain this one?
+```
+---
+### `Server:SetWeather(Weather:string)`
+```
+Sets the weather.
+```
+---
+### `Server:BreakCooldown(CancelWeather:boolean)`
+```
+Breaks the cooldown on weather, You probably should cancel weather since if you dont it may cause visual issues? 
+
+But who am I to tell you what to do!
+```
