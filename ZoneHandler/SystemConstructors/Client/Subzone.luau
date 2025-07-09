@@ -39,6 +39,8 @@ game:GetService("RunService").RenderStepped:Connect(function()
 	Busy = false
 end)
 
+local Zones = {}
+
 function module:CreateZone(ZoneID:string, Parts:{BasePart})
 	local NewZone = Instance.new("Folder")
 	
@@ -60,11 +62,18 @@ function module:CreateZone(ZoneID:string, Parts:{BasePart})
 	
 	local Zone_Object = Zone.new(NewZone)
 	
+	table.insert(Zones, Zone_Object)
+	
 	Zone_Object.localPlayerEntered:Connect(function()
 		table.insert(Que, {Action = Enumerator.ActionType.Enter, Sub_ID = ZoneID})
 	end)
 	
 	Zone_Object.localPlayerExited:Connect(function()
+		for I, item in ipairs(Zones) do
+			if item:findLocalPlayer() == true then
+				return
+			end
+		end
 		table.insert(Que, {Action = Enumerator.ActionType.Leave, Sub_ID = ZoneID})
 	end)
 end
